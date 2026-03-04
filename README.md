@@ -42,7 +42,7 @@ cp config.ini.example config.ini
 - **로그 저장 경로**: BLF 파일 저장 폴더
 - **로테이션 용량**: MB 단위 (실수 가능, 예: 0.5)
 - **재연결**: `reconnect_max_retries`, `reconnect_interval_sec` (끊김 시 지수 백오프 재시도)
-- **StreamManager**: `use_mock` (true: 로컬 모킹, false: 실제 Greengrass, `stream_manager_real` 구현 필요)
+- **StreamManager**: `use_mock` (true: 로컬 모킹, false: 실제 Greengrass Stream Manager → S3)
 
 ## 사용법
 
@@ -81,10 +81,6 @@ can-blackbox/
 ├── docs/                # 문서
 └── scripts/             # 유틸리티 스크립트
 ```
-
-## 미구현 / 추후 개발
-
-- **stream_manager_real**: 실제 Greengrass StreamManager 연동. 배포 시 `stream_manager_real.py` 구현 필요.
 
 ## 추가 고려사항 (TODO)
 
