@@ -1,0 +1,7 @@
+# CAN Blackbox 의존성
+# Python 3.9+ 필요
+
+python-can>=4.3.0
+awsiotsdk>=1.12.0
+# use_mock=false (실제 Greengrass StreamManager) 시 S3 업로드용
+stream-manager>=1.1.0
