@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.stream_manager_mock import StreamManagerMock
+from src.directory_uploader import MockUploadClient
 
 
 def test_upload_file_success(tmp_path: Path) -> None:
@@ -15,7 +15,7 @@ def test_upload_file_success(tmp_path: Path) -> None:
     f = tmp_path / "test.blf"
     f.write_bytes(b"blf content")
 
-    mock = StreamManagerMock(config=config, mock_output_dir=tmp_path / "out")
+    mock = MockUploadClient(config=config, mock_output_dir=tmp_path / "out")
     result = mock.upload_file(f)
     mock.close()
 
@@ -33,7 +33,7 @@ def test_upload_file_delete_false(tmp_path: Path) -> None:
     f = tmp_path / "keep.blf"
     f.write_bytes(b"data")
 
-    mock = StreamManagerMock(config=config, mock_output_dir=tmp_path / "out")
+    mock = MockUploadClient(config=config, mock_output_dir=tmp_path / "out")
     result = mock.upload_file(f, delete_on_success=False)
     mock.close()
 
@@ -46,7 +46,7 @@ def test_upload_file_delete_false(tmp_path: Path) -> None:
 
 def test_upload_file_read_error(tmp_path: Path) -> None:
     """존재하지 않는 파일 업로드 시 False"""
-    mock = StreamManagerMock(config={}, mock_output_dir=tmp_path)
+    mock = MockUploadClient(config={}, mock_output_dir=tmp_path)
     result = mock.upload_file(Path("/nonexistent/file.blf"))
     mock.close()
     assert result is False
@@ -54,7 +54,7 @@ def test_upload_file_read_error(tmp_path: Path) -> None:
 
 def test_upload_file_after_close_raises(tmp_path: Path) -> None:
     """close 후 upload_file 시 RuntimeError"""
-    mock = StreamManagerMock(config={}, mock_output_dir=tmp_path)
+    mock = MockUploadClient(config={}, mock_output_dir=tmp_path)
     mock.close()
     f = tmp_path / "x.blf"
     f.write_bytes(b"x")
@@ -68,7 +68,7 @@ def test_mock_uses_s3_like_structure(tmp_path: Path) -> None:
     f = tmp_path / "CBB_2025-03-04T120000_#001.blf"
     f.write_bytes(b"blf data")
 
-    mock = StreamManagerMock(config=config, mock_output_dir=tmp_path)
+    mock = MockUploadClient(config=config, mock_output_dir=tmp_path)
     mock.upload_file(f)
     mock.close()
 
@@ -85,7 +85,7 @@ def test_default_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.chdir(tmp_path)
     f = tmp_path / "a.blf"
     f.write_bytes(b"a")
-    mock = StreamManagerMock(config={})
+    mock = MockUploadClient(config={})
     mock.upload_file(f)
     mock.close()
     base = tmp_path / "mock_uploads" / "mock-bucket" / "can-logs"

@@ -52,7 +52,7 @@ def _setup_buses_and_notifiers(
         try:
             bus = can.interface.Bus(
                 channel=iface,
-                bustype="socketcan",
+                interface="socketcan",
             )
         except can.CanError as e:
             for n in notifiers:

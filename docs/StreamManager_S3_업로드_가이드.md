@@ -39,24 +39,24 @@ Stream Manager는 업로드 성공/실패를 status stream으로 알려주기만
 ### 2.1 전체 흐름
 
 ```
-[file_watcher] 신규 BLF 파일 감지
+[directory_uploader] 신규 BLF 파일 감지 (스캔)
        │
        ▼
-[uploader] S3ExportTaskDefinition 생성
-       │   - input_url = 로컬 파일 절대 경로
+[directory_uploader] S3ExportTaskDefinition 생성
+       │   - input_url = file:// + 로컬 파일 절대 경로
        │   - bucket, key = config에서
        │
        ▼
-[uploader] append_message(stream_name, JSON_bytes)로 태스크 전달
+[directory_uploader] append_message(stream_name, JSON_bytes)로 태스크 전달
        │
        ▼
 [Stream Manager] 파일 읽기 → S3 업로드 → status stream에 결과 기록
        │
        ▼
-[uploader] status stream에서 Success 확인
+[directory_uploader] status stream에서 Success 확인
        │
        ▼
-[uploader] 로컬 파일 삭제 (delete_on_success)
+[directory_uploader] 로컬 파일 삭제 (delete_on_success)
 ```
 
 ### 2.2 핵심 사항
@@ -75,7 +75,7 @@ Stream Manager는 업로드 성공/실패를 status stream으로 알려주기만
 
 ---
 
-## 3. Python 구현 예시 (stream_manager_real)
+## 3. Python 구현 예시 (directory_uploader 내부)
 
 ### 3.1 태스크 전달
 
@@ -84,16 +84,19 @@ from stream_manager import StreamManagerClient
 from stream_manager.data import S3ExportTaskDefinition
 from stream_manager.util import Util
 
-# input_url: 로컬 파일 절대 경로 (pathlib.Path → str)
+# input_url: file:// + 절대 경로
 # Stream Manager가 이 경로의 파일을 읽어 S3로 업로드
+input_url = f"file://{path.resolve()}"
+s3_key = f"{s3_prefix}!{{timestamp:yyyy/MM/dd}}/{path.name}"
+
 task = S3ExportTaskDefinition(
-    input_url=str(path.resolve()),  # 절대 경로
+    input_url=input_url,
     bucket=config["s3_bucket"],
-    key=f"{config['s3_prefix']}{path.name}",
+    key=s3_key,
     user_metadata={"source": "can-blackbox"},
 )
 data = Util.validate_and_serialize_to_json_bytes(task)
-seq = client.append_message(stream_name=stream_name, data=data)
+client.append_message(stream_name=stream_name, data=data)
 ```
 
 ### 3.2 Status Stream으로 완료 확인
@@ -127,12 +130,12 @@ for msg in messages:
 
 ### 4.1 모킹 vs 실제
 
-| 항목 | 모킹 (StreamManagerMock) | 실제 (StreamManagerReal) |
-|------|--------------------------|---------------------------|
-| append_message 인자 | `data` = 파일 바이트 | `data` = S3ExportTaskDefinition JSON |
-| filename | 사용 (모킹 출력 파일명) | 사용 안 함 (key에 path.name 사용) |
-| 업로드 완료 판단 | append 성공 시 즉시 | status stream Success 확인 후 |
-| 파일 삭제 시점 | append 성공 직후 | status Success 확인 후 |
+| 항목 | 모킹 (MockUploadClient) | 실제 (_create_real_upload_client) |
+|------|--------------------------|-----------------------------------|
+| 모킹 방식 | 로컬 파일 복사 (bucket/prefix/날짜 구조) | S3ExportTaskDefinition JSON append |
+| 실제 | - | `data` = S3ExportTaskDefinition JSON |
+| 업로드 완료 판단 | 복사 성공 시 즉시 | status stream Success 확인 후 |
+| 파일 삭제 시점 | 복사 성공 후 | status Success 확인 후 |
 
 ### 4.2 프로토콜/인터페이스
 

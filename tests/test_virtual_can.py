@@ -16,7 +16,7 @@ except ImportError:
 def test_vcan0_connection() -> None:
     """vcan0 연결 및 송수신 검증"""
     try:
-        bus = can.interface.Bus(channel="vcan0", bustype="socketcan")
+        bus = can.interface.Bus(channel="vcan0", interface="socketcan")
     except can.CanError as e:
         pytest.skip(f"vcan0 사용 불가 (Virtual CAN 미설정): {e}")
 

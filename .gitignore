@@ -67,3 +67,4 @@ logs/
 
 # 로컬 설정 오버라이드 (선택)
 # config.local.ini
+aws-greengrass-stream-manager-sdk-python/

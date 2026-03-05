@@ -41,7 +41,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        bus = can.interface.Bus(channel=args.interface, bustype="socketcan")
+        bus = can.interface.Bus(channel=args.interface, interface="socketcan")
     except can.CanError as e:
         print(f"CAN 인터페이스 연결 실패: {e}")
         print(f"Virtual CAN 설정: ./scripts/virtual_can_setup.sh {args.interface}")

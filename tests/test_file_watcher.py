@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.file_watcher import _scan_new_files
+from src.directory_uploader import _scan_new_files
 
 
 def test_scan_ignores_zero_byte_files(tmp_path: Path) -> None:

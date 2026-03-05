@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.storage_manager import get_total_size_mb, trim_storage
+from src.directory_uploader import get_total_size_mb, trim_storage
 
 
 def test_get_total_size_mb_empty(tmp_path: Path) -> None:

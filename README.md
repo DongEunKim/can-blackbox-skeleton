@@ -51,10 +51,7 @@ cp config.ini.example config.ini
 python3 -m src.can_logger
 
 # 업로더 실행 (터미널 2) - 폴더 감시 + StreamManager 전송 + 삭제
-python3 -m src.uploader
-
-# 감시만 (업로드 없이)
-python3 -m src.file_watcher
+python3 -m src.directory_uploader
 ```
 
 ## 테스트
@@ -76,7 +73,10 @@ python3 -m pytest tests/ -v
 can-blackbox/
 ├── config.ini.example   # 설정 템플릿
 ├── requirements.txt
-├── src/                 # 소스 코드
+├── src/
+│   ├── can_logger.py         # CAN → BLF 로깅
+│   ├── config_loader.py      # 설정 로드
+│   └── directory_uploader.py # 폴더 스캔 + S3 업로드 + 용량 정리 통합
 ├── tests/               # 단위 테스트
 ├── docs/                # 문서
 └── scripts/             # 유틸리티 스크립트
